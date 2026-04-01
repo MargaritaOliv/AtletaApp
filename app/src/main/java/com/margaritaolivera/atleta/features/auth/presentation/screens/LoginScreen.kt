@@ -1,0 +1,173 @@
+package com.margaritaolivera.atleta.features.auth.presentation.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.margaritaolivera.atleta.features.auth.presentation.viewmodels.AuthViewModel
+import com.margaritaolivera.atleta.core.ui.theme.*
+
+@Composable
+fun LoginScreen(
+    viewModel: AuthViewModel,
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit
+) {
+    val state by viewModel.state.collectAsState()
+    val email by viewModel.emailLogin.collectAsState()
+    val password by viewModel.passwordLogin.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(60.dp))
+
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .background(SurfaceDark, RoundedCornerShape(20.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Bolt,
+                contentDescription = null,
+                tint = NeonGreen,
+                modifier = Modifier.size(40.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = "BIENVENIDO",
+            fontSize = 42.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = White,
+            letterSpacing = 2.sp
+        )
+
+        Text(
+            text = "Inicia sesión para continuar tu entrenamiento",
+            color = TextGray,
+            fontSize = 14.sp
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        Text(
+            "CORREO",
+            modifier = Modifier.fillMaxWidth(),
+            color = TextGray,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        CustomTextField(
+            value = email,
+            onValueChange = { viewModel.emailLogin.value = it },
+            placeholder = "tu@correo.com",
+            icon = Icons.Default.Email
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            "CONTRASEÑA",
+            modifier = Modifier.fillMaxWidth(),
+            color = TextGray,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        CustomTextField(
+            value = password,
+            onValueChange = { viewModel.passwordLogin.value = it },
+            placeholder = "••••••••",
+            icon = Icons.Default.Lock,
+            isPassword = true
+        )
+
+        TextButton(
+            onClick = {},
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("¿Olvidaste tu contraseña?", color = TextGray, fontSize = 12.sp)
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Button(
+            onClick = { viewModel.loginAndSync() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+            shape = RoundedCornerShape(20.dp),
+            enabled = !state.isLoading
+        ) {
+            if (state.isLoading) {
+                CircularProgressIndicator(color = Color.Black)
+            } else {
+                Text(
+                    "INGRESAR Y SINCRONIZAR",
+                    color = Color.Black,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 18.sp
+                )
+            }
+        }
+
+        TextButton(onClick = onNavigateToRegister) {
+            Text("¿No tienes cuenta? Regístrate aquí", color = White)
+        }
+    }
+}
+
+@Composable
+fun CustomTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isPassword: Boolean = false
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        placeholder = { Text(placeholder, color = TextGray) },
+        leadingIcon = { Icon(icon, contentDescription = null, tint = TextGray) },
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = SurfaceDark,
+            unfocusedContainerColor = SurfaceDark,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedTextColor = White,
+            unfocusedTextColor = White
+        ),
+        shape = RoundedCornerShape(16.dp)
+    )
+}
