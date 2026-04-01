@@ -27,9 +27,16 @@ class AuthViewModel @Inject constructor(
     var passwordRegister = MutableStateFlow("")
 
     fun loginAndSync() {
+        val email = emailLogin.value.trim()
+        val password = passwordLogin.value.trim()
+        if (email.isEmpty() || password.isEmpty()) {
+            _state.update { it.copy(error = "Llena todos los campos") }
+            return
+        }
+
         _state.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            repository.loginAndSync().fold(
+            repository.loginAndSync(email, password).fold(
                 onSuccess = { athleteData ->
                     _state.update { it.copy(isLoading = false, athlete = athleteData, isSuccess = true) }
                 },
@@ -38,5 +45,31 @@ class AuthViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    fun registerAndSync() {
+        val name = nameRegister.value.trim()
+        val email = emailRegister.value.trim()
+        val password = passwordRegister.value.trim()
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            _state.update { it.copy(error = "Llena todos los campos") }
+            return
+        }
+
+        _state.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch {
+            repository.registerAndSync(name, email, password).fold(
+                onSuccess = { athleteData ->
+                    _state.update { it.copy(isLoading = false, athlete = athleteData, isSuccess = true) }
+                },
+                onFailure = { exception ->
+                    _state.update { it.copy(isLoading = false, error = exception.message) }
+                }
+            )
+        }
+    }
+
+    fun resetState() {
+        _state.update { it.copy(isSuccess = false, error = null) }
     }
 }

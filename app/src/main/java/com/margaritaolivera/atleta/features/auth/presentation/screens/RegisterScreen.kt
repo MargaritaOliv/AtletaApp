@@ -24,9 +24,19 @@ fun RegisterScreen(
     viewModel: AuthViewModel,
     onBackToLogin: () -> Unit
 ) {
+    val state by viewModel.state.collectAsState()
     val name by viewModel.nameRegister.collectAsState()
     val email by viewModel.emailRegister.collectAsState()
     val password by viewModel.passwordRegister.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            android.widget.Toast.makeText(context, "Registro exitoso", android.widget.Toast.LENGTH_SHORT).show()
+            viewModel.resetState()
+            onBackToLogin()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -106,23 +116,37 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = { },
+            onClick = { viewModel.registerAndSync() },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp),
             colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(20.dp),
+            enabled = !state.isLoading
         ) {
-            Text(
-                "REGISTRARME",
-                color = Color.Black,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 18.sp
-            )
+            if (state.isLoading) {
+                CircularProgressIndicator(color = Color.Black)
+            } else {
+                Text(
+                    "REGISTRARME",
+                    color = Color.Black,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 18.sp
+                )
+            }
         }
 
         TextButton(onClick = onBackToLogin) {
             Text("¿Ya tienes cuenta? Inicia sesión", color = White)
+        }
+
+        state.error?.let { errorMessage ->
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 14.sp
+            )
         }
     }
 }

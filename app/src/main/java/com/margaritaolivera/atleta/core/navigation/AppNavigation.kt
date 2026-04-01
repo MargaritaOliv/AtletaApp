@@ -37,7 +37,6 @@ fun AppNavigation() {
         startDestination = Screens.Login
     ) {
 
-        // --- MÓDULO A: AUTENTICACIÓN ---
 
         composable<Screens.Login> {
             val viewModel: AuthViewModel = hiltViewModel()
@@ -64,7 +63,6 @@ fun AppNavigation() {
             )
         }
 
-        // --- MÓDULO B: ENTRENAMIENTOS ---
 
         composable<Screens.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
@@ -72,6 +70,11 @@ fun AppNavigation() {
                 viewModel = viewModel,
                 onStartWorkout = { workoutType ->
                     navController.navigate(Screens.WorkoutSession(type = workoutType))
+                },
+                onLogout = {
+                    navController.navigate(Screens.Login) {
+                        popUpTo<Screens.Home> { inclusive = true }
+                    }
                 }
             )
         }
@@ -80,7 +83,6 @@ fun AppNavigation() {
             val session = backStackEntry.toRoute<Screens.WorkoutSession>()
             val type = session.type
 
-            // Pantalla temporal de entrenamiento (Hasta que creemos la WorkoutSessionScreen)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -96,22 +98,17 @@ fun AppNavigation() {
             }
         }
 
-        // --- MÓDULO C: SOCIAL ---
 
         composable<Screens.FriendsList> {
-            // Placeholder
         }
 
         composable<Screens.Ranking> {
-            // Placeholder
         }
 
-        // --- TIEMPO REAL: DUELOS ---
 
         composable<Screens.LiveDuel> { backStackEntry ->
             val duel = backStackEntry.toRoute<Screens.LiveDuel>()
             val room = duel.roomName
-            // Placeholder
         }
     }
 }

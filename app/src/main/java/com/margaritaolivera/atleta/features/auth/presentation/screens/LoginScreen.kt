@@ -28,6 +28,15 @@ fun LoginScreen(
     val state by viewModel.state.collectAsState()
     val email by viewModel.emailLogin.collectAsState()
     val password by viewModel.passwordLogin.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            android.widget.Toast.makeText(context, "Inicio de sesión exitoso", android.widget.Toast.LENGTH_SHORT).show()
+            viewModel.resetState()
+            onLoginSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -139,6 +148,15 @@ fun LoginScreen(
 
         TextButton(onClick = onNavigateToRegister) {
             Text("¿No tienes cuenta? Regístrate aquí", color = White)
+        }
+
+        state.error?.let { errorMessage ->
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 14.sp
+            )
         }
     }
 }
