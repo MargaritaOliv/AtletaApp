@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "310882977625",
+    "project_id": "mascota-e0301",
+    "storage_bucket": "mascota-e0301.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310882977625:android:fb32af1edb2161598a6e48",
+        "android_client_info": {
+          "package_name": "com.margaritaolivera.atleta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOguJaFTEpavGjT7VijM5o1Ptgr_8-PI4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

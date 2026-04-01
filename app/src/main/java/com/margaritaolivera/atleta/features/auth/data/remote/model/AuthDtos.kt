@@ -8,9 +8,9 @@ data class FcmTokenRequest(
 
 data class AthleteResponse(
     val id: Int,
-    val nombre: String,
+    @SerializedName("displayName", alternate = ["nombre"]) val displayName: String,
     val email: String,
-    val nivel: Int,
-    val experiencia: Int,
+    @SerializedName("level", alternate = ["nivel"]) val level: Int,
+    @SerializedName("experience", alternate = ["experiencia"]) val experience: Int,
     @SerializedName("foto_url") val fotoUrl: String?
 )
