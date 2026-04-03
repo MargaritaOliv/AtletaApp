@@ -1,6 +1,7 @@
 package com.margaritaolivera.atleta.features.auth.presentation.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -77,7 +78,7 @@ fun LoginScreen(
             fontSize = 14.sp
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(64.dp))
 
         Text(
             "CORREO",
@@ -174,7 +175,8 @@ fun CustomTextField(
         onValueChange = onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp),
+            .height(60.dp)
+            .border(1.dp, NeonGreen, RoundedCornerShape(16.dp)),
         placeholder = { Text(placeholder, color = TextGray) },
         leadingIcon = { Icon(icon, contentDescription = null, tint = TextGray) },
         visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
@@ -184,7 +186,8 @@ fun CustomTextField(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             focusedTextColor = White,
-            unfocusedTextColor = White
+            unfocusedTextColor = White,
+            cursorColor = NeonGreen
         ),
         shape = RoundedCornerShape(16.dp)
     )

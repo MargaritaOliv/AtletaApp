@@ -8,12 +8,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.SportsMma
+import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.NordicWalking
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,12 +22,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.margaritaolivera.atleta.core.ui.theme.*
 import com.margaritaolivera.atleta.features.training.presentation.viewmodels.HomeViewModel
+import java.time.LocalTime
+
+val CyanAccent = Color(0xFF00FFD1)
+val CardDarkBackground = Color(0xFF141414)
+val DarkGrayText = Color(0xFF555555)
 
 @Composable
 fun HomeScreen(
@@ -37,123 +44,192 @@ fun HomeScreen(
 ) {
     val profile by viewModel.profileState.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DarkBackground)
-    ) {
-        TopAppBarAthlete(
-            name = profile.name,
-            level = profile.level,
-            xp = profile.xp,
-            maxXp = profile.maxXp,
-            onSocialClick = onNavigateToSocial,
-            onLogoutClick = {
-                viewModel.logout()
-                onLogout()
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+    Scaffold(
+        bottomBar = {
+            CustomBottomNavigation(onNavigateToSocial = onNavigateToSocial)
+        },
+        containerColor = DarkBackground
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item { Spacer(modifier = Modifier.height(40.dp)) }
+
             item {
-                Text(
-                    text = "SELECCIONA TU ENTRENAMIENTO",
-                    color = TextGray,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                HeaderSection(
+                    fullName = profile.name,
+                    onLogout = {
+                        viewModel.logout()
+                        onLogout()
+                    }
                 )
             }
 
             item {
-                WorkoutCard(
-                    title = "SENTADILLAS",
-                    subtitle = "Quema grasa e incrementa fuerza",
+                HeroStatsCard(
+                    level = profile.level,
+                    xp = profile.xp,
+                    maxXp = profile.maxXp
+                )
+            }
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    StatSquareCard(
+                        modifier = Modifier.weight(1f),
+                        title = "DISTANCIA",
+                        value = "--",
+                        unit = " km",
+                        valueColor = CyanAccent
+                    )
+                    StatSquareCard(
+                        modifier = Modifier.weight(1f),
+                        title = "SENTADILLAS",
+                        value = "--",
+                        unit = "",
+                        valueColor = White
+                    )
+                }
+            }
+
+            item {
+                DuelsCard(won = "--", total = "--")
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "INICIAR ENTRENAMIENTO",
+                    color = DarkGrayText,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            item {
+                WorkoutActionCard(
                     icon = Icons.Default.FitnessCenter,
-                    workoutType = "SQUAT",
+                    title = "SQUAT",
+                    subtitle = "Sentadillas",
+                    details = "Incrementa tu fuerza",
                     onClick = { onStartWorkout("SQUAT") }
                 )
             }
 
             item {
-                WorkoutCard(
-                    title = "CORRER",
-                    subtitle = "Cardio de alta intensidad",
+                WorkoutActionCard(
                     icon = Icons.Default.DirectionsRun,
-                    workoutType = "RUN",
+                    title = "RUN",
+                    subtitle = "Carrera",
+                    details = "Cardio de alta intensidad",
                     onClick = { onStartWorkout("RUN") }
                 )
             }
 
             item {
-                WorkoutCard(
-                    title = "TROTAR",
-                    subtitle = "Calentamiento y resistencia",
+                WorkoutActionCard(
                     icon = Icons.Default.NordicWalking,
-                    workoutType = "JOG",
+                    title = "JOG",
+                    subtitle = "Trote",
+                    details = "Resistencia y calentamiento",
                     onClick = { onStartWorkout("JOG") }
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(32.dp)) }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
 @Composable
-fun TopAppBarAthlete(name: String, level: Int, xp: Int, maxXp: Int, onSocialClick: () -> Unit, onLogoutClick: () -> Unit) {
-    Surface(
+fun HeaderSection(fullName: String, onLogout: () -> Unit) {
+    val nameParts = fullName.trim().split(" ")
+    val firstName = nameParts.firstOrNull() ?: "Atleta"
+    val lastName = if (nameParts.size > 1) nameParts.drop(1).joinToString(" ") else ""
+
+    val initials = "${firstName.take(1)}${lastName.take(1)}".uppercase()
+
+    val currentHour = LocalTime.now().hour
+    val timeBasedPhrase = when (currentHour) {
+        in 5..11 -> "¡Buenos días! A entrenar."
+        in 12..18 -> "¡Buenas tardes! Sigue así."
+        else -> "¡Buenas noches! Cierra con fuerza."
+    }
+
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        color = SurfaceDark,
-        shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
-        shadowElevation = 8.dp
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 48.dp, bottom = 32.dp)
+        Column {
+            Text(text = "Bienvenido", color = TextGray, fontSize = 14.sp)
+            Row {
+                Text(text = "$firstName ", color = White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+                if (lastName.isNotEmpty()) {
+                    Text(text = lastName, color = NeonGreen, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = timeBasedPhrase,
+                color = CyanAccent,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .border(2.dp, NeonGreen, CircleShape)
+                .background(Color(0xFF1A1A00))
+                .clickable { onLogout() },
+            contentAlignment = Alignment.Center
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                        .background(NeonGreen.copy(alpha = 0.2f))
-                        .border(2.dp, NeonGreen, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Person, contentDescription = "Perfil", tint = NeonGreen, modifier = Modifier.size(32.dp))
-                }
+            Text(text = initials, color = NeonGreen, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        }
+    }
+}
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "HOLA, ¡VAMOS!", color = TextGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Text(text = name.uppercase(), color = White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
-                }
-
-                IconButton(onClick = onSocialClick) {
-                    Icon(Icons.Default.People, contentDescription = "Comunidad", tint = NeonGreen)
-                }
-                IconButton(onClick = onLogoutClick) {
-                    Icon(Icons.Default.Settings, contentDescription = "Cerrar sesión", tint = White)
-                }
+@Composable
+fun HeroStatsCard(level: Int, xp: Int, maxXp: Int) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, NeonGreen, RoundedCornerShape(24.dp)),
+        colors = CardDefaults.cardColors(containerColor = CardDarkBackground),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Badge(text = "Nivel $level", textColor = NeonGreen, borderColor = NeonGreen)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(text = "NIVEL $level", color = NeonGreen, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = "${xp} / ${maxXp} XP", color = TextGray, fontSize = 14.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(text = "EXPERIENCIA", color = TextGray, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                Text(
+                    text = "%,d / %,d".format(xp, maxXp),
+                    color = NeonGreen,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -162,54 +238,151 @@ fun TopAppBarAthlete(name: String, level: Int, xp: Int, maxXp: Int, onSocialClic
                 progress = { if (maxXp > 0) xp.toFloat() / maxXp.toFloat() else 0f },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = NeonGreen,
-                trackColor = DarkBackground
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = CyanAccent,
+                trackColor = Color(0xFF2A2A2A)
             )
         }
     }
 }
 
 @Composable
-fun WorkoutCard(title: String, subtitle: String, icon: ImageVector, workoutType: String, onClick: () -> Unit) {
+fun Badge(text: String, textColor: Color, borderColor: Color) {
+    Box(
+        modifier = Modifier
+            .border(1.dp, borderColor.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+            .background(borderColor.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+    ) {
+        Text(text = text, color = textColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun StatSquareCard(modifier: Modifier = Modifier, title: String, value: String, unit: String, valueColor: Color) {
+    Card(
+        modifier = modifier.height(110.dp),
+        colors = CardDefaults.cardColors(containerColor = CardDarkBackground),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = title, color = DarkGrayText, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(text = value, color = valueColor, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                if (unit.isNotEmpty()) {
+                    Text(text = unit, color = TextGray, fontSize = 14.sp, modifier = Modifier.padding(bottom = 6.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DuelsCard(won: String, total: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = CardDarkBackground),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(text = "DUELOS GANADOS", color = DarkGrayText, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(text = won, color = NeonGreen, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                Text(text = " de $total disputados", color = TextGray, fontSize = 14.sp, modifier = Modifier.padding(bottom = 6.dp, start = 8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun WorkoutActionCard(icon: ImageVector, title: String, subtitle: String, details: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = CardDarkBackground),
+        shape = RoundedCornerShape(20.dp)
     ) {
         Row(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(DarkBackground),
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF222222)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = NeonGreen, modifier = Modifier.size(32.dp))
+                Icon(icon, contentDescription = null, tint = NeonGreen, modifier = Modifier.size(24.dp))
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    color = White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = subtitle,
-                    color = TextGray,
-                    fontSize = 14.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = title, color = White, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(text = " • $subtitle", color = White, fontSize = 16.sp)
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(text = details, color = TextGray, fontSize = 12.sp)
+            }
+
+            Box(
+                modifier = Modifier
+                    .background(NeonGreen, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text("GO", color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
+    }
+}
+
+@Composable
+fun CustomBottomNavigation(onNavigateToSocial: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(DarkBackground)
+            .padding(vertical = 12.dp, horizontal = 24.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BottomNavItem(icon = Icons.Default.Bolt, text = "Inicio", color = NeonGreen, isSelected = true) {}
+        BottomNavItem(icon = Icons.Default.SportsMma, text = "Duelo", color = Color(0xFFFF5252), isSelected = false) {}
+        BottomNavItem(icon = Icons.Default.EmojiEvents, text = "Ranking", color = Color(0xFFFFB300), isSelected = false) {}
+        BottomNavItem(icon = Icons.Default.Group, text = "Amigos", color = Color(0xFFB388FF), isSelected = false) {
+            onNavigateToSocial()
+        }
+    }
+}
+
+@Composable
+fun BottomNavItem(icon: ImageVector, text: String, color: Color, isSelected: Boolean, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = text,
+            tint = if (isSelected) color else TextGray,
+            modifier = Modifier.size(28.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = text,
+            color = if (isSelected) color else TextGray,
+            fontSize = 10.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
     }
 }

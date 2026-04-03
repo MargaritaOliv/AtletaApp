@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -45,7 +46,23 @@ fun RegisterScreen(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(60.dp))
+
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .background(SurfaceDark, RoundedCornerShape(20.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Bolt,
+                contentDescription = null,
+                tint = NeonGreen,
+                modifier = Modifier.size(40.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Text(
             text = "CREAR CUENTA",
@@ -61,7 +78,7 @@ fun RegisterScreen(
             fontSize = 14.sp
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(56.dp))
 
         Text(
             "NOMBRE",
@@ -70,7 +87,9 @@ fun RegisterScreen(
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
         CustomTextField(
             value = name,
             onValueChange = { viewModel.nameRegister.value = it },
@@ -87,7 +106,9 @@ fun RegisterScreen(
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
         CustomTextField(
             value = email,
             onValueChange = { viewModel.emailRegister.value = it },
@@ -104,7 +125,9 @@ fun RegisterScreen(
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
         CustomTextField(
             value = password,
             onValueChange = { viewModel.passwordRegister.value = it },
