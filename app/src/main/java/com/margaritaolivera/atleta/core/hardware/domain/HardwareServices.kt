@@ -1,5 +1,7 @@
 package com.margaritaolivera.atleta.core.hardware.domain
 
+import kotlinx.coroutines.flow.Flow
+
 interface VibrationService {
     fun vibrateShort()
     fun vibrateLong()
@@ -10,8 +12,6 @@ interface FlashService {
     fun toggleFlash(enabled: Boolean)
     fun blinkFlash(times: Int, intervalMs: Long = 100)
 }
-
-import kotlinx.coroutines.flow.Flow
 
 data class AccelerometerData(
     val x: Float,

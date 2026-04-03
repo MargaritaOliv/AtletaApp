@@ -6,8 +6,7 @@ sealed class Screens {
     @Serializable object Login
     @Serializable object Register
     @Serializable object Home
-    @Serializable object FriendsList
-    @Serializable object Ranking
+    @Serializable object Social
 
     @Serializable
     data class WorkoutSession(val type: String)

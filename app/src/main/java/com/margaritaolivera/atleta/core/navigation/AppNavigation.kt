@@ -14,29 +14,26 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-
-// Colores de tu tema
 import com.margaritaolivera.atleta.core.ui.theme.DarkBackground
 import com.margaritaolivera.atleta.core.ui.theme.NeonGreen
-
-// Pantallas de Auth
 import com.margaritaolivera.atleta.features.auth.presentation.screens.LoginScreen
 import com.margaritaolivera.atleta.features.auth.presentation.screens.RegisterScreen
 import com.margaritaolivera.atleta.features.auth.presentation.viewmodels.AuthViewModel
-
-// Pantallas de Training
+import com.margaritaolivera.atleta.features.social.presentation.screens.SocialScreen
+import com.margaritaolivera.atleta.features.social.presentation.viewmodels.SocialViewModel
 import com.margaritaolivera.atleta.features.training.presentation.screens.HomeScreen
+import com.margaritaolivera.atleta.features.training.presentation.screens.WorkoutSessionScreen
 import com.margaritaolivera.atleta.features.training.presentation.viewmodels.HomeViewModel
+import com.margaritaolivera.atleta.features.training.presentation.viewmodels.WorkoutSessionViewModel
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(startDestination: Any) {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = Screens.Login
+        startDestination = startDestination
     ) {
-
 
         composable<Screens.Login> {
             val viewModel: AuthViewModel = hiltViewModel()
@@ -63,13 +60,15 @@ fun AppNavigation() {
             )
         }
 
-
         composable<Screens.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
             HomeScreen(
                 viewModel = viewModel,
                 onStartWorkout = { workoutType ->
                     navController.navigate(Screens.WorkoutSession(type = workoutType))
+                },
+                onNavigateToSocial = {
+                    navController.navigate(Screens.Social)
                 },
                 onLogout = {
                     navController.navigate(Screens.Login) {
@@ -81,30 +80,21 @@ fun AppNavigation() {
 
         composable<Screens.WorkoutSession> { backStackEntry ->
             val session = backStackEntry.toRoute<Screens.WorkoutSession>()
-            val type = session.type
+            val viewModel: WorkoutSessionViewModel = hiltViewModel()
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(DarkBackground),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "ENTRENAMIENTO: $type",
-                    color = NeonGreen,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp
-                )
-            }
+            WorkoutSessionScreen(
+                viewModel = viewModel,
+                workoutType = session.type,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
-
-        composable<Screens.FriendsList> {
+        composable<Screens.Social> {
+            val viewModel: SocialViewModel = hiltViewModel()
+            SocialScreen(viewModel = viewModel)
         }
-
-        composable<Screens.Ranking> {
-        }
-
 
         composable<Screens.LiveDuel> { backStackEntry ->
             val duel = backStackEntry.toRoute<Screens.LiveDuel>()

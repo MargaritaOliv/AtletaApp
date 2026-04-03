@@ -2,7 +2,8 @@ package com.margaritaolivera.atleta.features.auth.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.margaritaolivera.atleta.features.auth.domain.repositories.AuthRepository
+import com.margaritaolivera.atleta.features.auth.domain.usecases.LoginUseCase
+import com.margaritaolivera.atleta.features.auth.domain.usecases.RegisterUseCase
 import com.margaritaolivera.atleta.features.auth.presentation.screens.AuthUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthRepository
+    private val loginUseCase: LoginUseCase,
+    private val registerUseCase: RegisterUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthUiState())
@@ -36,7 +38,7 @@ class AuthViewModel @Inject constructor(
 
         _state.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            repository.loginAndSync(email, password).fold(
+            loginUseCase(email, password).fold(
                 onSuccess = { athleteData ->
                     _state.update { it.copy(isLoading = false, athlete = athleteData, isSuccess = true) }
                 },
@@ -58,7 +60,7 @@ class AuthViewModel @Inject constructor(
 
         _state.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            repository.registerAndSync(name, email, password).fold(
+            registerUseCase(name, email, password).fold(
                 onSuccess = { athleteData ->
                     _state.update { it.copy(isLoading = false, athlete = athleteData, isSuccess = true) }
                 },

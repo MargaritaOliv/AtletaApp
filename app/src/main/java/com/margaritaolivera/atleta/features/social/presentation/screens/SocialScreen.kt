@@ -7,15 +7,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,37 +28,139 @@ fun SocialScreen(viewModel: SocialViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("AMIGOS", "PENDIENTES", "RANKING")
 
-    Column(modifier = Modifier.fillMaxSize().background(DarkBackground)) {
-        TabRow(
-            selectedTabIndex = selectedTab,
-            containerColor = SurfaceDark,
-            contentColor = NeonGreen,
-            indicator = { TabRowDefaults.SecondaryIndicator(Modifier.tabIndicatorOffset(it[selectedTab]), color = NeonGreen) }
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index },
-                    text = { Text(title, fontWeight = FontWeight.Bold, fontSize = 12.sp) }
-                )
-            }
-        }
+    // Estado para controlar el Dialog de agregar amigo
+    var showAddFriendDialog by remember { mutableStateOf(false) }
+    var friendUidInput by remember { mutableStateOf("") }
 
-        if (state.isLoading) {
-            Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = NeonGreen) }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                when (selectedTab) {
-                    0 -> items(state.friends) { friend -> AthleteItem(friend.nombre, friend.nivel) }
-                    1 -> items(state.pendingRequests) { req ->
-                        PendingItem(req.nombre) { viewModel.acceptFriend(req.id) }
-                    }
-                    2 -> items(state.ranking) { rank ->
-                        RankingItem(rank.posicion, rank.nombre, rank.nivel, rank.experiencia)
+    Scaffold(
+        floatingActionButton = {
+            if (selectedTab == 0) {
+                FloatingActionButton(
+                    onClick = { showAddFriendDialog = true },
+                    containerColor = NeonGreen,
+                    contentColor = DarkBackground,
+                    shape = CircleShape
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Añadir amigo")
+                }
+            }
+        },
+        containerColor = DarkBackground
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = SurfaceDark,
+                contentColor = NeonGreen,
+                indicator = { TabRowDefaults.SecondaryIndicator(Modifier.tabIndicatorOffset(it[selectedTab]), color = NeonGreen) }
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        text = { Text(title, fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+                    )
+                }
+            }
+
+            if (state.isLoading) {
+                Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator(color = NeonGreen) }
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    when (selectedTab) {
+                        0 -> {
+                            if (state.friends.isEmpty()) {
+                                item { EmptyStateText("Aún no tienes amigos agregados") }
+                            } else {
+                                items(state.friends) { friend -> AthleteItem(friend.nombre, friend.nivel) }
+                            }
+                        }
+                        1 -> {
+                            if (state.pendingRequests.isEmpty()) {
+                                item { EmptyStateText("No tienes solicitudes pendientes") }
+                            } else {
+                                items(state.pendingRequests) { req ->
+                                    PendingItem(req.nombre) { viewModel.acceptFriend(req.id) }
+                                }
+                            }
+                        }
+                        2 -> {
+                            if (state.ranking.isEmpty()) {
+                                item { EmptyStateText("El ranking está vacío") }
+                            } else {
+                                items(state.ranking) { rank ->
+                                    RankingItem(rank.posicion, rank.nombre, rank.nivel, rank.experiencia)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+
+    if (showAddFriendDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddFriendDialog = false },
+            containerColor = SurfaceDark,
+            title = {
+                Text("Agregar Amigo", color = White, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column {
+                    Text("Ingresa el ID del usuario que deseas agregar:", color = TextGray, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = friendUidInput,
+                        onValueChange = { friendUidInput = it },
+                        placeholder = { Text("Ej: Yz1xT8...", color = TextGray) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = White,
+                            unfocusedTextColor = White,
+                            focusedBorderColor = NeonGreen,
+                            unfocusedBorderColor = TextGray
+                        ),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (friendUidInput.isNotBlank()) {
+                            viewModel.sendRequest(friendUidInput)
+                            friendUidInput = ""
+                            showAddFriendDialog = false
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
+                ) {
+                    Text("ENVIAR", color = DarkBackground, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddFriendDialog = false }) {
+                    Text("CANCELAR", color = TextGray)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun EmptyStateText(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = message, color = TextGray, fontSize = 14.sp)
     }
 }
 
@@ -104,7 +205,13 @@ fun RankingItem(pos: Int, nombre: String, nivel: Int, xp: Int) {
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("#$pos", color = if(pos <= 3) NeonGreen else TextGray, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, modifier = Modifier.width(40.dp))
-        AthleteItem(nombre, nivel) // Reutilizamos el item
+        Text(
+            "#$pos",
+            color = if(pos <= 3) NeonGreen else TextGray,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 18.sp,
+            modifier = Modifier.width(40.dp)
+        )
+        AthleteItem(nombre, nivel)
     }
 }

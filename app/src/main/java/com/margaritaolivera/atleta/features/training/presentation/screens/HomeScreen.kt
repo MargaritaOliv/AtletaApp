@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.NordicWalking
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -20,22 +21,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.margaritaolivera.atleta.core.ui.theme.DarkBackground
-import com.margaritaolivera.atleta.core.ui.theme.NeonGreen
-import com.margaritaolivera.atleta.core.ui.theme.SurfaceDark
-import com.margaritaolivera.atleta.core.ui.theme.TextGray
-import com.margaritaolivera.atleta.core.ui.theme.White
+import com.margaritaolivera.atleta.core.ui.theme.*
 import com.margaritaolivera.atleta.features.training.presentation.viewmodels.HomeViewModel
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     onStartWorkout: (String) -> Unit,
+    onNavigateToSocial: () -> Unit,
     onLogout: () -> Unit
 ) {
     val profile by viewModel.profileState.collectAsState()
@@ -50,6 +47,7 @@ fun HomeScreen(
             level = profile.level,
             xp = profile.xp,
             maxXp = profile.maxXp,
+            onSocialClick = onNavigateToSocial,
             onLogoutClick = {
                 viewModel.logout()
                 onLogout()
@@ -110,7 +108,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun TopAppBarAthlete(name: String, level: Int, xp: Int, maxXp: Int, onLogoutClick: () -> Unit) {
+fun TopAppBarAthlete(name: String, level: Int, xp: Int, maxXp: Int, onSocialClick: () -> Unit, onLogoutClick: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = SurfaceDark,
@@ -142,6 +140,9 @@ fun TopAppBarAthlete(name: String, level: Int, xp: Int, maxXp: Int, onLogoutClic
                     Text(text = name.uppercase(), color = White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
                 }
 
+                IconButton(onClick = onSocialClick) {
+                    Icon(Icons.Default.People, contentDescription = "Comunidad", tint = NeonGreen)
+                }
                 IconButton(onClick = onLogoutClick) {
                     Icon(Icons.Default.Settings, contentDescription = "Cerrar sesión", tint = White)
                 }
@@ -171,13 +172,7 @@ fun TopAppBarAthlete(name: String, level: Int, xp: Int, maxXp: Int, onLogoutClic
 }
 
 @Composable
-fun WorkoutCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    workoutType: String,
-    onClick: () -> Unit
-) {
+fun WorkoutCard(title: String, subtitle: String, icon: ImageVector, workoutType: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
