@@ -8,14 +8,14 @@ interface SocialApi {
     suspend fun sendRequest(@Body request: FriendRequest)
 
     @GET("api/v1/friends/pending")
-    suspend fun getPending(): List<FriendResponse>
+    suspend fun getPending(): PendingRequestsResponse
 
-    @PUT("api/v1/friends/accept/{id}")
-    suspend fun acceptRequest(@Path("id") id: Int)
+    @PUT("api/v1/friends/accept")
+    suspend fun acceptRequest(@Body request: AcceptFriendRequest)
 
     @GET("api/v1/friends/list")
-    suspend fun getFriends(): List<FriendResponse>
+    suspend fun getFriends(): FriendsListResponse
 
     @GET("api/v1/ranking/global")
-    suspend fun getRanking(): List<RankingResponse>
+    suspend fun getRanking(): RankingListResponse
 }

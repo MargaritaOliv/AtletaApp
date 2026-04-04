@@ -3,21 +3,43 @@ package com.margaritaolivera.atleta.features.social.data.remote.model
 import com.google.gson.annotations.SerializedName
 
 data class FriendRequest(
-    @SerializedName("targetFirebaseUid") val targetUid: String
+    val email: String
 )
 
-data class FriendResponse(
-    val id: Int,
-    val nombre: String,
-    val nivel: Int,
-    @SerializedName("foto_url") val fotoUrl: String?,
-    val estado: String
+data class PendingRequestsResponse(
+    val requests: List<PendingRequestDto>
 )
 
-data class RankingResponse(
+data class PendingRequestDto(
     val id: Int,
-    val nombre: String,
-    val nivel: Int,
-    val experiencia: Int,
-    @SerializedName("foto_url") val fotoUrl: String?
+    @SerializedName("firebase_uid") val firebaseUid: String?,
+    val displayName: String,
+    val level: Int
+)
+
+data class FriendsListResponse(
+    val friends: List<FriendDto>
+)
+
+data class FriendDto(
+    val id: Int,
+    @SerializedName("firebase_uid") val firebaseUid: String?,
+    val displayName: String,
+    val level: Int,
+    val experience: Int
+)
+
+data class AcceptFriendRequest(
+    val requestId: Int,
+    val userId: Int
+)
+
+data class RankingListResponse(
+    val ranking: List<RankingDto>
+)
+
+data class RankingDto(
+    val displayName: String,
+    val level: Int,
+    val experience: Int
 )

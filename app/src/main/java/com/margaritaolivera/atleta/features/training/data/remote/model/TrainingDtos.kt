@@ -1,29 +1,32 @@
 package com.margaritaolivera.atleta.features.training.data.remote.model
 
+import com.google.gson.annotations.SerializedName
+
 data class StartWorkoutRequest(
     val type: String
 )
 
 data class WorkoutResponse(
-    val workoutId: Int,
+    @SerializedName("workoutId") val workoutId: Int,
     val status: String
 )
 
 data class AddSetRequest(
-    val workoutId: Int,
-    val reps: Int,
-    val intensityScore: Float
+    @SerializedName("workoutId") val workoutId: Int,
+    @SerializedName("repsCount") val reps: Int,
+    @SerializedName("intensityScore") val intensityScore: Float
 )
 
 data class AddSetResponse(
-    val currentXp: Int,
-    val currentLevel: Int
+    @SerializedName("currentExperience") val currentXp: Int,
+    @SerializedName("currentLevel") val currentLevel: Int
 )
 
 data class FinishWorkoutRequest(
-    val workoutId: Int,
-    val totalDistance: Float,
-    val avgCadence: Float
+    @SerializedName("workoutId") val workoutId: Int,
+    @SerializedName("totalReps") val totalReps: Int,
+    @SerializedName("totalDistance") val totalDistance: Float,
+    @SerializedName("avgCadence") val avgCadence: Float
 )
 
 data class FinishWorkoutResponse(

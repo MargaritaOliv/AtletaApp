@@ -6,7 +6,7 @@ import javax.inject.Inject
 class SendFriendRequestUseCase @Inject constructor(
     private val repository: SocialRepository
 ) {
-    suspend operator fun invoke(targetFirebaseUid: String): Result<Unit> {
-        return repository.sendFriendRequest(targetFirebaseUid)
+    suspend operator fun invoke(email: String): Result<Unit> {
+        return repository.sendFriendRequest(email)
     }
 }

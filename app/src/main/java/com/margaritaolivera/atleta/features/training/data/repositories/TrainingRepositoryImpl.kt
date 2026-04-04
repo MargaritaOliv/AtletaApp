@@ -30,8 +30,8 @@ class TrainingRepositoryImpl @Inject constructor(
         Result.failure(e)
     }
 
-    override suspend fun finishWorkout(workoutId: Int, totalDistance: Float, avgCadence: Float): Result<FinishWorkoutResponse> = try {
-        val response = api.finishWorkout(FinishWorkoutRequest(workoutId, totalDistance, avgCadence))
+    override suspend fun finishWorkout(workoutId: Int, totalReps: Int, totalDistance: Float, avgCadence: Float): Result<FinishWorkoutResponse> = try {
+        val response = api.finishWorkout(FinishWorkoutRequest(workoutId, totalReps, totalDistance, avgCadence))
         Result.success(response)
     } catch (e: Exception) {
         Result.failure(e)

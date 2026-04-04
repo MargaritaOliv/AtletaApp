@@ -27,7 +27,7 @@ fun WorkoutSessionScreen(
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.startWorkout(workoutType)
+        viewModel.prepareWorkout(workoutType)
     }
 
     LaunchedEffect(state.isFinished) {
@@ -54,7 +54,6 @@ fun WorkoutSessionScreen(
                 }
             }
         } else {
-            // 1. Top Bar (Botón atrás y Título)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -79,29 +78,26 @@ fun WorkoutSessionScreen(
                     letterSpacing = 2.sp
                 )
 
-                // Espaciador invisible para mantener el título centrado
                 Box(modifier = Modifier.size(48.dp))
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // 2. Métricas de Tiempo y Objetivo (Estructura de diseño, sin datos falsos)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                MetricBox(value = "--:--", label = "TIEMPO")
-                MetricBox(value = "--", label = "OBJETIVO")
+                MetricBox(value = formatTime(state.timerSeconds), label = "TIEMPO")
+                val goalText = if (workoutType == "SQUAT") "${state.goalValue}" else "${state.goalValue}m"
+                MetricBox(value = goalText, label = "OBJETIVO")
             }
 
-            // 3. Espacio reservado para la animación
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                // Aquí tu compañero podrá insertar la animación Lottie, Canvas o imagen
                 Text(
                     text = "[ Espacio para Animación ]",
                     color = TextGray.copy(alpha = 0.2f),
@@ -109,20 +105,22 @@ fun WorkoutSessionScreen(
                 )
             }
 
-            // 4. Contador gigante de repeticiones actuales
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val mainValue = if (workoutType == "SQUAT") "${state.currentReps}" else "%.2f".format(state.distanceKm)
+                val unitLabel = if (workoutType == "SQUAT") "REPETICIONES" else "KILÓMETROS"
+                
                 Text(
-                    text = "${state.currentReps}",
-                    fontSize = 100.sp,
+                    text = mainValue,
+                    fontSize = 80.sp,
                     color = White,
                     fontWeight = FontWeight.ExtraBold,
-                    lineHeight = 100.sp
+                    lineHeight = 80.sp
                 )
                 Text(
-                    text = "REPETICIONES",
+                    text = unitLabel,
                     fontSize = 14.sp,
                     color = NeonGreen,
                     fontWeight = FontWeight.ExtraBold,
@@ -132,7 +130,6 @@ fun WorkoutSessionScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // 5. Total Guardado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -141,43 +138,74 @@ fun WorkoutSessionScreen(
                 Box(modifier = Modifier.size(8.dp).background(NeonGreen, CircleShape))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = "Total guardado: ", color = TextGray, fontSize = 14.sp)
-                Text(text = "${state.totalReps} reps", color = White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                val savedText = if (state.isStarted) {
+                    val totalAccumulatedReps = state.totalReps + state.currentReps
+                    if (workoutType == "SQUAT") "$totalAccumulatedReps reps"
+                    else "%.2f km".format(state.distanceKm)
+                } else {
+                    if (workoutType == "SQUAT") {
+                        if (state.previousTotal > 0) "${state.previousTotal.toInt()} reps" else "-- reps"
+                    } else {
+                        if (state.previousTotal > 0) "%.2f km".format(state.previousTotal) else "-- km"
+                    }
+                }
+                Text(text = savedText, color = White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 6. Botones de Acción
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            if (!state.isStarted) {
                 Button(
-                    onClick = { viewModel.saveSet() },
+                    onClick = { viewModel.startTracking() },
                     modifier = Modifier
-                        .weight(1f)
-                        .height(60.dp)
-                        .border(1.dp, SurfaceDark, RoundedCornerShape(16.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("GUARDAR SERIE", color = White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                }
-
-                Button(
-                    onClick = { viewModel.finishWorkout() },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(60.dp),
+                        .fillMaxWidth()
+                        .height(65.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("FINALIZAR", color = Color.Black, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                    Text("INICIAR ENTRENAMIENTO", color = Color.Black, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (workoutType == "SQUAT") {
+                        Button(
+                            onClick = { viewModel.saveSet() },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(60.dp)
+                                .border(1.dp, SurfaceDark, RoundedCornerShape(16.dp)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("GUARDAR SERIE", color = White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
+
+                    Button(
+                        onClick = { viewModel.finishWorkout() },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(60.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = if (workoutType == "SQUAT") Color(0xFFFF5252) else NeonGreen),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("FINALIZAR", color = if (workoutType == "SQUAT") White else Color.Black, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+}
+
+private fun formatTime(seconds: Long): String {
+    val mins = seconds / 60
+    val secs = seconds % 60
+    return "%02d:%02d".format(mins, secs)
 }
 
 @Composable

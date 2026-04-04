@@ -25,10 +25,16 @@ class FirebaseAuthManager @Inject constructor() {
         }
     }
 
-    suspend fun register(email: String, password: String): Result<String> {
+    suspend fun register(email: String, password: String, name: String): Result<String> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
             val user = result.user ?: return Result.failure(Exception("No se pudo crear usuario"))
+
+            val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                .setDisplayName(name)
+                .build()
+            user.updateProfile(profileUpdates).await()
+
             val token = user.getIdToken(true).await().token ?: return Result.failure(Exception("Sin token"))
             Result.success(token)
         } catch (e: Exception) {
