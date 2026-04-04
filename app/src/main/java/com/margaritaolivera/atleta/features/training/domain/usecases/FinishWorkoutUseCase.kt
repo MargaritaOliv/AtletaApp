@@ -7,7 +7,7 @@ import javax.inject.Inject
 class FinishWorkoutUseCase @Inject constructor(
     private val repository: TrainingRepository
 ) {
-    suspend operator fun invoke(workoutId: Int, totalDistance: Float, avgCadence: Float): Result<FinishWorkoutResponse> {
-        return repository.finishWorkout(workoutId, totalDistance, avgCadence)
+    suspend operator fun invoke(workoutId: Int, totalReps: Int, totalDistance: Float, avgCadence: Float): Result<FinishWorkoutResponse> {
+        return repository.finishWorkout(workoutId, totalReps, totalDistance, avgCadence)
     }
 }

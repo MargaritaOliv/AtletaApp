@@ -31,6 +31,31 @@ class SessionManager @Inject constructor(
             .apply()
     }
 
+    fun saveUserId(userId: Int) {
+        prefs.edit().putInt("USER_ID", userId).apply()
+    }
+
+    fun getUserId(): Int = prefs.getInt("USER_ID", -1)
+
+    fun clearWorkoutStats() {
+        prefs.edit()
+            .remove("last_stat_SQUAT")
+            .remove("last_stat_RUN")
+            .remove("last_stat_JOG")
+            .apply()
+    }
+
+    fun clearAllWorkoutData() {
+        prefs.edit()
+            .remove("goal_SQUAT")
+            .remove("goal_RUN")
+            .remove("goal_JOG")
+            .remove("last_stat_SQUAT")
+            .remove("last_stat_RUN")
+            .remove("last_stat_JOG")
+            .apply()
+    }
+
     fun getName(): String? = prefs.getString("NAME", null)
 
     fun getLevel(): Int = prefs.getInt("LEVEL", 1)
@@ -38,6 +63,37 @@ class SessionManager @Inject constructor(
     fun getXp(): Int = prefs.getInt("XP", 0)
 
     fun logout() {
-        prefs.edit().clear().apply()
+        prefs.edit()
+            .remove("TOKEN")
+            .remove("FCM_TOKEN")
+            .remove("NAME")
+            .remove("LEVEL")
+            .remove("XP")
+            .apply()
+    }
+
+    fun getGoal(type: String): Int {
+        return prefs.getInt("goal_$type", if (type == "SQUAT") 20 else 1000) // 20 reps o 1km por defecto
+    }
+
+    fun saveGoal(type: String, value: Int) {
+        prefs.edit().putInt("goal_$type", value).apply()
+    }
+
+    fun saveLastWorkoutStat(type: String, value: Float) {
+        prefs.edit().putFloat("last_stat_$type", value).apply()
+    }
+
+    fun getLastSquatReps(): Int = prefs.getFloat("last_stat_SQUAT", 0f).toInt()
+
+    fun getLastRunDistance(): Float {
+        val run = prefs.getFloat("last_stat_RUN", -1f)
+        val jog = prefs.getFloat("last_stat_JOG", -1f)
+        return when {
+            run < 0 && jog < 0 -> 0f
+            run < 0 -> jog
+            jog < 0 -> run
+            else -> maxOf(run, jog)
+        }
     }
 }

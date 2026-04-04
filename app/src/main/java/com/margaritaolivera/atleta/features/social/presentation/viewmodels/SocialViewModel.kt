@@ -53,9 +53,9 @@ class SocialViewModel @Inject constructor(
         }
     }
 
-    fun sendRequest(uid: String) {
+    fun sendRequest(email: String) {
         viewModelScope.launch {
-            sendFriendRequestUseCase(uid).fold(
+            sendFriendRequestUseCase(email).fold(
                 onSuccess = { _errorFlow.emit("Solicitud enviada correctamente") },
                 onFailure = { _errorFlow.emit("No se pudo enviar la solicitud") }
             )

@@ -7,7 +7,7 @@ import retrofit2.http.PUT
 
 interface AuthApi {
     @POST("api/v1/auth/login")
-    suspend fun loginSync(): AthleteResponse
+    suspend fun loginSync(): LoginSyncResponse
 
     @PUT("api/v1/auth/fcm-token")
     suspend fun updateFcmToken(@Body request: FcmTokenRequest)

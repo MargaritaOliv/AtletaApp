@@ -28,7 +28,6 @@ fun SocialScreen(viewModel: SocialViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("AMIGOS", "PENDIENTES", "RANKING")
 
-    // Estado para controlar el Dialog de agregar amigo
     var showAddFriendDialog by remember { mutableStateOf(false) }
     var friendUidInput by remember { mutableStateOf("") }
 
@@ -62,7 +61,27 @@ fun SocialScreen(viewModel: SocialViewModel) {
                     Tab(
                         selected = selectedTab == index,
                         onClick = { selectedTab = index },
-                        text = { Text(title, fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+                        text = { 
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(title, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                if (index == 1 && state.pendingRequests.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .size(18.dp)
+                                            .background(Color.Red, CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = state.pendingRequests.size.toString(),
+                                            color = Color.White,
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     )
                 }
             }
@@ -112,12 +131,12 @@ fun SocialScreen(viewModel: SocialViewModel) {
             },
             text = {
                 Column {
-                    Text("Ingresa el ID del usuario que deseas agregar:", color = TextGray, fontSize = 14.sp)
+                    Text("Ingresa el correo de la persona que deseas agregar:", color = TextGray, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = friendUidInput,
                         onValueChange = { friendUidInput = it },
-                        placeholder = { Text("Ej: Yz1xT8...", color = TextGray) },
+                        placeholder = { Text("Ej: amigo@gmail.com", color = TextGray) },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = White,
                             unfocusedTextColor = White,
