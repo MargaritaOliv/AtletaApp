@@ -8,9 +8,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.NordicWalking
+import androidx.compose.material.icons.filled.SportsMma
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,13 +46,6 @@ fun HomeScreen(
     val profile by viewModel.profileState.collectAsState()
 
     Scaffold(
-        bottomBar = {
-            CustomBottomNavigation(
-                onNavigateToSocial = onNavigateToSocial,
-                onNavigateToDuel = onNavigateToDuel,
-                hasPendingRequests = profile.hasPendingRequests
-            )
-        },
         containerColor = DarkBackground
     ) { paddingValues ->
         LazyColumn(

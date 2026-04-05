@@ -38,12 +38,13 @@ fun AppNavigation(startDestination: Any) {
 
     val showBottomBar = currentDestination?.hierarchy?.any { destination ->
         destination.hasRoute<Screens.Home>() ||
-                destination.hasRoute<Screens.Duel>() ||
+                destination.hasRoute<Screens.DuelSelection>() ||
                 destination.hasRoute<Screens.Ranking>() ||
                 destination.hasRoute<Screens.Social>()
     } == true
 
-    Scaffold(
+    androidx.compose.material3.Scaffold(
+        containerColor = com.margaritaolivera.atleta.core.ui.theme.DarkBackground,
         bottomBar = {
             if (showBottomBar) {
                 AtletaBottomBar(
@@ -56,7 +57,7 @@ fun AppNavigation(startDestination: Any) {
                         }
                     },
                     onNavigateToDuel = {
-                        navController.navigate(Screens.Duel) {
+                        navController.navigate(Screens.DuelSelection) {
                             popUpTo(Screens.Home) { saveState = true }
                             launchSingleTop = true
                             restoreState = true

@@ -64,7 +64,7 @@ fun AtletaBottomBar(
             icon = Icons.Default.SportsMma,
             text = "Duelo",
             color = Color(0xFFFF5252),
-            isSelected = currentRoute?.hierarchy?.any { it.hasRoute<Screens.Duel>() } == true,
+            isSelected = currentRoute?.hierarchy?.any { it.hasRoute<Screens.DuelSelection>() } == true,
             onClick = onNavigateToDuel
         )
         BottomNavItem(
