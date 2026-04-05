@@ -54,11 +54,11 @@ fun LoginScreen(
                 .background(SurfaceDark, RoundedCornerShape(20.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Bolt,
-                contentDescription = null,
-                tint = NeonGreen,
-                modifier = Modifier.size(40.dp)
+            val composition by com.airbnb.lottie.compose.rememberLottieComposition(com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(com.margaritaolivera.atleta.R.raw.lightning_bolt))
+            com.airbnb.lottie.compose.LottieAnimation(
+                composition = composition,
+                iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever,
+                modifier = Modifier.size(60.dp)
             )
         }
 
