@@ -20,7 +20,9 @@ data class AthleteProfileState(
     val lastRunKm: Float = 0f,
     val hasPendingRequests: Boolean = false,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val duelsWon: Int = 0,
+    val duelsTotal: Int = 0
 )
 
 @HiltViewModel
@@ -48,7 +50,9 @@ class HomeViewModel @Inject constructor(
             xp = xp,
             maxXp = 100,
             lastSquatReps = sessionManager.getLastSquatReps(),
-            lastRunKm = sessionManager.getLastRunDistance()
+            lastRunKm = sessionManager.getLastRunDistance(),
+            duelsWon = sessionManager.getDuelsWon(),
+            duelsTotal = sessionManager.getDuelsTotal()
         )
     }
 

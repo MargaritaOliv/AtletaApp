@@ -22,7 +22,9 @@ import com.margaritaolivera.atleta.core.ui.theme.NeonGreen
 import com.margaritaolivera.atleta.features.auth.presentation.screens.LoginScreen
 import com.margaritaolivera.atleta.features.auth.presentation.screens.RegisterScreen
 import com.margaritaolivera.atleta.features.auth.presentation.viewmodels.AuthViewModel
+import com.margaritaolivera.atleta.features.social.presentation.screens.DuelSelectionScreen
 import com.margaritaolivera.atleta.features.social.presentation.screens.SocialScreen
+import com.margaritaolivera.atleta.features.social.presentation.viewmodels.DuelViewModel
 import com.margaritaolivera.atleta.features.social.presentation.viewmodels.SocialViewModel
 import com.margaritaolivera.atleta.features.training.presentation.screens.HomeScreen
 import com.margaritaolivera.atleta.features.training.presentation.screens.WorkoutSessionScreen
@@ -77,6 +79,9 @@ fun AppNavigation(startDestination: Any) {
                 onNavigateToSocial = {
                     navController.navigate(Screens.Social)
                 },
+                onNavigateToDuel = {
+                    navController.navigate(Screens.DuelSelection)
+                },
                 onLogout = {
                     navController.navigate(Screens.Login) {
                         popUpTo<Screens.Home> { inclusive = true }
@@ -92,6 +97,27 @@ fun AppNavigation(startDestination: Any) {
             WorkoutSessionScreen(
                 viewModel = viewModel,
                 workoutType = session.type,
+                opponentName = session.opponentName,
+                opponentXp = session.opponentXp,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable<Screens.DuelSelection> {
+            val viewModel: DuelViewModel = hiltViewModel()
+            DuelSelectionScreen(
+                viewModel = viewModel,
+                onNavigateToWorkout = { type, name, xp ->
+                    navController.navigate(
+                        Screens.WorkoutSession(
+                            type = type,
+                            opponentName = name,
+                            opponentXp = xp
+                        )
+                    )
+                },
                 onNavigateBack = {
                     navController.popBackStack()
                 }

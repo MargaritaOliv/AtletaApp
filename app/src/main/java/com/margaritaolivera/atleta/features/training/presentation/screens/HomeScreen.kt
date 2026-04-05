@@ -40,6 +40,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onStartWorkout: (String) -> Unit,
     onNavigateToSocial: () -> Unit,
+    onNavigateToDuel: () -> Unit,
     onLogout: () -> Unit
 ) {
     val profile by viewModel.profileState.collectAsState()
@@ -48,6 +49,7 @@ fun HomeScreen(
         bottomBar = {
             CustomBottomNavigation(
                 onNavigateToSocial = onNavigateToSocial,
+                onNavigateToDuel = onNavigateToDuel,
                 hasPendingRequests = profile.hasPendingRequests
             )
         },
@@ -105,7 +107,9 @@ fun HomeScreen(
             }
 
             item {
-                DuelsCard(won = "--", total = "--")
+                val wonText = if (profile.duelsTotal > 0) profile.duelsWon.toString() else "--"
+                val totalText = if (profile.duelsTotal > 0) profile.duelsTotal.toString() else "--"
+                DuelsCard(won = wonText, total = totalText)
             }
 
             item {
@@ -352,7 +356,11 @@ fun WorkoutActionCard(icon: ImageVector, title: String, subtitle: String, detail
 }
 
 @Composable
-fun CustomBottomNavigation(onNavigateToSocial: () -> Unit, hasPendingRequests: Boolean = false) {
+fun CustomBottomNavigation(
+    onNavigateToSocial: () -> Unit,
+    onNavigateToDuel: () -> Unit,
+    hasPendingRequests: Boolean = false
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -362,7 +370,9 @@ fun CustomBottomNavigation(onNavigateToSocial: () -> Unit, hasPendingRequests: B
         verticalAlignment = Alignment.CenterVertically
     ) {
         BottomNavItem(icon = Icons.Default.Bolt, text = "Inicio", color = NeonGreen, isSelected = true) {}
-        BottomNavItem(icon = Icons.Default.SportsMma, text = "Duelo", color = Color(0xFFFF5252), isSelected = false) {}
+        BottomNavItem(icon = Icons.Default.SportsMma, text = "Duelo", color = Color(0xFFFF5252), isSelected = false) {
+            onNavigateToDuel()
+        }
         BottomNavItem(icon = Icons.Default.EmojiEvents, text = "Ranking", color = Color(0xFFFFB300), isSelected = false) {}
         BottomNavItem(icon = Icons.Default.Group, text = "Amigos", color = Color(0xFFB388FF), isSelected = false, hasBadge = hasPendingRequests) {
             onNavigateToSocial()

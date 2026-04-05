@@ -5,7 +5,8 @@ data class Friend(
     val nombre: String,
     val nivel: Int,
     val fotoUrl: String?,
-    val status: String
+    val status: String,
+    val experiencia: Int = 0
 )
 
 data class RankingAthlete(

@@ -23,7 +23,7 @@ class SocialRepositoryImpl @Inject constructor(
 
     override suspend fun getPendingRequests(): Result<List<Friend>> = try {
         val response = api.getPending()
-        Result.success(response.requests.map { Friend(it.id, it.displayName, it.level, null, "PENDING") })
+        Result.success(response.requests.map { Friend(it.id, it.displayName, it.level, null, "PENDING", 0) })
     } catch (e: Exception) {
         Result.failure(e)
     }
@@ -38,7 +38,7 @@ class SocialRepositoryImpl @Inject constructor(
 
     override suspend fun getFriendsList(): Result<List<Friend>> = try {
         val response = api.getFriends()
-        Result.success(response.friends.map { Friend(it.id, it.displayName, it.level, null, "ACCEPTED") })
+        Result.success(response.friends.map { Friend(it.id, it.displayName, it.level, null, "ACCEPTED", it.experience) })
     } catch (e: Exception) {
         Result.failure(e)
     }
