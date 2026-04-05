@@ -17,24 +17,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.margaritaolivera.atleta.features.auth.presentation.viewmodels.AuthViewModel
 import com.margaritaolivera.atleta.core.ui.theme.*
 
 @Composable
 fun LoginScreen(
-    viewModel: AuthViewModel,
+    state: AuthUiState,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLoginClick: () -> Unit,
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onResetState: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
-    val email by viewModel.emailLogin.collectAsState()
-    val password by viewModel.passwordLogin.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
             android.widget.Toast.makeText(context, "Inicio de sesión exitoso", android.widget.Toast.LENGTH_SHORT).show()
-            viewModel.resetState()
+            onResetState()
             onLoginSuccess()
         }
     }
@@ -91,8 +91,8 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
-            value = email,
-            onValueChange = { viewModel.emailLogin.value = it },
+            value = state.emailLogin,
+            onValueChange = onEmailChange,
             placeholder = "tu@correo.com",
             icon = Icons.Default.Email
         )
@@ -110,8 +110,8 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
-            value = password,
-            onValueChange = { viewModel.passwordLogin.value = it },
+            value = state.passwordLogin,
+            onValueChange = onPasswordChange,
             placeholder = "••••••••",
             icon = Icons.Default.Lock,
             isPassword = true
@@ -127,7 +127,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = { viewModel.loginAndSync() },
+            onClick = onLoginClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp),

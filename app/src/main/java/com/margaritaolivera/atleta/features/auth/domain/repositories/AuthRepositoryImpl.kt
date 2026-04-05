@@ -4,7 +4,8 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.margaritaolivera.atleta.core.auth.FirebaseAuthManager
 import com.margaritaolivera.atleta.core.session.SessionManager
 import com.margaritaolivera.atleta.features.auth.data.remote.api.AuthApi
-import com.margaritaolivera.atleta.features.auth.data.remote.model.*
+import com.margaritaolivera.atleta.features.auth.data.remote.model.FcmTokenRequest
+import com.margaritaolivera.atleta.features.auth.domain.entities.Athlete
 import com.margaritaolivera.atleta.features.auth.domain.repositories.AuthRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -14,12 +15,12 @@ class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuthManager: FirebaseAuthManager,
     private val sessionManager: SessionManager
 ) : AuthRepository {
-    override suspend fun loginAndSync(email: String, password: String): Result<AthleteResponse> = try {
+    override suspend fun loginAndSync(email: String, password: String): Result<Athlete> = try {
         val loginResult = firebaseAuthManager.login(email, password)
         if (loginResult.isFailure) throw Exception(loginResult.exceptionOrNull()?.message)
-        
+
         sessionManager.saveToken(loginResult.getOrThrow())
-        
+
         val apiResponse = api.loginSync().user
 
         val previousUserId = sessionManager.getUserId()
@@ -27,7 +28,7 @@ class AuthRepositoryImpl @Inject constructor(
             sessionManager.clearAllWorkoutData()
         }
         sessionManager.saveUserId(apiResponse.id)
-        
+
         val savedName = sessionManager.getName()
         val finalName = if (previousUserId == apiResponse.id && savedName != null) {
             savedName
@@ -35,7 +36,7 @@ class AuthRepositoryImpl @Inject constructor(
             apiResponse.displayName?.takeIf { it.isNotBlank() && it != "Atleta" }
                 ?: email.substringBefore("@").replaceFirstChar { it.uppercase() }
         }
-        
+
         sessionManager.saveProfile(
             name = finalName,
             level = apiResponse.level,
@@ -49,15 +50,24 @@ class AuthRepositoryImpl @Inject constructor(
             e.printStackTrace()
         }
 
-        Result.success(apiResponse)
+        val athlete = Athlete(
+            id = apiResponse.id,
+            displayName = finalName,
+            email = apiResponse.email ?: email,
+            level = apiResponse.level,
+            experience = apiResponse.experience,
+            fotoUrl = apiResponse.fotoUrl
+        )
+
+        Result.success(athlete)
     } catch (e: Exception) {
         Result.failure(e)
     }
 
-    override suspend fun registerAndSync(name: String, email: String, password: String): Result<AthleteResponse> = try {
+    override suspend fun registerAndSync(name: String, email: String, password: String): Result<Athlete> = try {
         val registerResult = firebaseAuthManager.register(email, password, name)
         if (registerResult.isFailure) throw Exception(registerResult.exceptionOrNull()?.message)
-        
+
         sessionManager.saveToken(registerResult.getOrThrow())
 
         val apiResponse = api.loginSync().user
@@ -67,9 +77,9 @@ class AuthRepositoryImpl @Inject constructor(
             sessionManager.clearAllWorkoutData()
         }
         sessionManager.saveUserId(apiResponse.id)
-        
+
         val finalName = apiResponse.displayName?.takeIf { it.isNotBlank() && it != "Atleta" } ?: name
-        
+
         sessionManager.saveProfile(
             name = finalName,
             level = apiResponse.level,
@@ -83,7 +93,16 @@ class AuthRepositoryImpl @Inject constructor(
             e.printStackTrace()
         }
 
-        Result.success(apiResponse)
+        val athlete = Athlete(
+            id = apiResponse.id,
+            displayName = finalName,
+            email = apiResponse.email ?: email,
+            level = apiResponse.level,
+            experience = apiResponse.experience,
+            fotoUrl = apiResponse.fotoUrl
+        )
+
+        Result.success(athlete)
     } catch (e: Exception) {
         Result.failure(e)
     }

@@ -21,16 +21,30 @@ class AuthViewModel @Inject constructor(
     private val _state = MutableStateFlow(AuthUiState())
     val state = _state.asStateFlow()
 
-    var emailLogin = MutableStateFlow("")
-    var passwordLogin = MutableStateFlow("")
+    fun onEmailLoginChange(value: String) {
+        _state.update { it.copy(emailLogin = value) }
+    }
 
-    var nameRegister = MutableStateFlow("")
-    var emailRegister = MutableStateFlow("")
-    var passwordRegister = MutableStateFlow("")
+    fun onPasswordLoginChange(value: String) {
+        _state.update { it.copy(passwordLogin = value) }
+    }
+
+    fun onNameRegisterChange(value: String) {
+        _state.update { it.copy(nameRegister = value) }
+    }
+
+    fun onEmailRegisterChange(value: String) {
+        _state.update { it.copy(emailRegister = value) }
+    }
+
+    fun onPasswordRegisterChange(value: String) {
+        _state.update { it.copy(passwordRegister = value) }
+    }
 
     fun loginAndSync() {
-        val email = emailLogin.value.trim()
-        val password = passwordLogin.value.trim()
+        val email = _state.value.emailLogin.trim()
+        val password = _state.value.passwordLogin.trim()
+
         if (email.isEmpty() || password.isEmpty()) {
             _state.update { it.copy(error = "Llena todos los campos") }
             return
@@ -50,9 +64,10 @@ class AuthViewModel @Inject constructor(
     }
 
     fun registerAndSync() {
-        val name = nameRegister.value.trim()
-        val email = emailRegister.value.trim()
-        val password = passwordRegister.value.trim()
+        val name = _state.value.nameRegister.trim()
+        val email = _state.value.emailRegister.trim()
+        val password = _state.value.passwordRegister.trim()
+
         if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
             _state.update { it.copy(error = "Llena todos los campos") }
             return
