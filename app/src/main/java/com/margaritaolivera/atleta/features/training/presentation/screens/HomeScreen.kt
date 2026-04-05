@@ -8,9 +8,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.NordicWalking
+import androidx.compose.material.icons.filled.SportsMma
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,6 +40,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onStartWorkout: (String) -> Unit,
     onNavigateToSocial: () -> Unit,
+    onNavigateToDuel: () -> Unit,
     onLogout: () -> Unit
 ) {
     val profile by viewModel.profileState.collectAsState()
@@ -95,7 +100,9 @@ fun HomeScreen(
             }
 
             item {
-                DuelsCard(won = "--", total = "--")
+                val wonText = if (profile.duelsTotal > 0) profile.duelsWon.toString() else "--"
+                val totalText = if (profile.duelsTotal > 0) profile.duelsTotal.toString() else "--"
+                DuelsCard(won = wonText, total = totalText)
             }
 
             item {
@@ -338,5 +345,63 @@ fun WorkoutActionCard(icon: ImageVector, title: String, subtitle: String, detail
                 Text("GO", color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
+    }
+}
+
+@Composable
+fun CustomBottomNavigation(
+    onNavigateToSocial: () -> Unit,
+    onNavigateToDuel: () -> Unit,
+    hasPendingRequests: Boolean = false
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(DarkBackground)
+            .padding(vertical = 12.dp, horizontal = 24.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BottomNavItem(icon = Icons.Default.Bolt, text = "Inicio", color = NeonGreen, isSelected = true) {}
+        BottomNavItem(icon = Icons.Default.SportsMma, text = "Duelo", color = Color(0xFFFF5252), isSelected = false) {
+            onNavigateToDuel()
+        }
+        BottomNavItem(icon = Icons.Default.EmojiEvents, text = "Ranking", color = Color(0xFFFFB300), isSelected = false) {}
+        BottomNavItem(icon = Icons.Default.Group, text = "Amigos", color = Color(0xFFB388FF), isSelected = false, hasBadge = hasPendingRequests) {
+            onNavigateToSocial()
+        }
+    }
+}
+
+@Composable
+fun BottomNavItem(icon: ImageVector, text: String, color: Color, isSelected: Boolean, hasBadge: Boolean = false, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Box {
+            Icon(
+                imageVector = icon,
+                contentDescription = text,
+                tint = if (isSelected) color else TextGray,
+                modifier = Modifier.size(28.dp)
+            )
+            if (hasBadge) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .background(Color.Red, CircleShape)
+                        .align(Alignment.TopEnd)
+                        .offset(x = 4.dp, y = (-2).dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = text,
+            color = if (isSelected) color else TextGray,
+            fontSize = 10.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
     }
 }

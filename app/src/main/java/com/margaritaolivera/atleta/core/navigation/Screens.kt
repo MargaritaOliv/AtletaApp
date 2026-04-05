@@ -9,9 +9,14 @@ sealed class Screens {
     @Serializable object Duel
     @Serializable object Ranking
     @Serializable object Social
+    @Serializable object DuelSelection
 
     @Serializable
-    data class WorkoutSession(val type: String)
+    data class WorkoutSession(
+        val type: String,
+        val opponentName: String? = null,
+        val opponentXp: Int = 0
+    )
 
     @Serializable
     data class LiveDuel(val roomName: String)

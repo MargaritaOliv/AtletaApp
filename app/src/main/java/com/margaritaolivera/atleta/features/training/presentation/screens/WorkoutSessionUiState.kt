@@ -13,5 +13,9 @@ data class WorkoutSessionUiState(
     val distanceKm: Float = 0f,
     val avgCadence: Float = 0f,
     val error: String? = null,
-    val isFinished: Boolean = false
+    val isFinished: Boolean = false,
+    val isDuel: Boolean = false,
+    val opponentName: String? = null,
+    val opponentXp: Int = 0,
+    val initialXpGap: Int = 0
 )

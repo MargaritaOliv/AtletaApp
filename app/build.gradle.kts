@@ -47,6 +47,9 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // Lottie - Animaciones JSON
+    implementation("com.airbnb.android:lottie-compose:6.4.0")
+
     // Core & Compose
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

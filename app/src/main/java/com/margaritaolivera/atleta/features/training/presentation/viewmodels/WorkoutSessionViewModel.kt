@@ -42,8 +42,11 @@ class WorkoutSessionViewModel @Inject constructor(
 
     private val strideLength = mapOf("RUN" to 1.2f, "JOG" to 0.8f)
 
-    fun prepareWorkout(type: String) {
+    fun prepareWorkout(type: String, opponentName: String? = null, opponentXp: Int = 0) {
         currentWorkoutType = type
+        val currentXp = sessionManager.getXp()
+        val initialGap = if (opponentName != null) opponentXp - currentXp else 0
+        
         val previousTotal = when (type) {
             "SQUAT" -> sessionManager.getLastSquatReps().toFloat()
             else -> sessionManager.getLastRunDistance()
@@ -52,6 +55,10 @@ class WorkoutSessionViewModel @Inject constructor(
             it.copy(
                 goalValue = sessionManager.getGoal(type),
                 previousTotal = previousTotal,
+                isDuel = opponentName != null,
+                opponentName = opponentName,
+                opponentXp = opponentXp,
+                initialXpGap = initialGap,
                 error = null
             )
         }
@@ -140,12 +147,28 @@ class WorkoutSessionViewModel @Inject constructor(
 
     private fun registerStep() {
         val stepMeters = strideLength[currentWorkoutType] ?: 0.7f
-        _state.update { it.copy(distanceKm = it.distanceKm + (stepMeters / 1000f)) }
+        _state.update {
+            val nextDist = it.distanceKm + (stepMeters / 1000f)
+            // Estimación: 1 XP cada 10 metros
+            val xpGained = if (it.isDuel) (stepMeters / 10f).toInt() else 0
+            it.copy(
+                distanceKm = nextDist,
+                initialXpGap = (it.initialXpGap - xpGained).coerceAtLeast(0)
+            )
+        }
     }
 
     private fun registerRep() {
         vibrationService.vibrateShort()
-        _state.update { it.copy(currentReps = it.currentReps + 1) }
+        _state.update {
+            val nextReps = it.currentReps + 1
+            // Estimación: 2 XP por sentadilla
+            val xpGained = if (it.isDuel) 2 else 0
+            it.copy(
+                currentReps = nextReps,
+                initialXpGap = (it.initialXpGap - xpGained).coerceAtLeast(0)
+            )
+        }
     }
 
     fun saveSet() {
@@ -235,6 +258,11 @@ class WorkoutSessionViewModel @Inject constructor(
                     }
 
                     checkObjective(finalReps, finalDistance)
+
+                    if (_state.value.isDuel) {
+                        val won = _state.value.initialXpGap <= 0
+                        sessionManager.incrementDuelsPlayed(won)
+                    }
 
                     _state.update { it.copy(isLoading = false, isTracking = false, isFinished = true) }
                 },

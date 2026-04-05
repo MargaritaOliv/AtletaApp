@@ -96,4 +96,18 @@ class SessionManager @Inject constructor(
             else -> maxOf(run, jog)
         }
     }
+
+    fun incrementDuelsPlayed(won: Boolean) {
+        val total = prefs.getInt("DUELS_TOTAL", 0) + 1
+        var wins = prefs.getInt("DUELS_WON", 0)
+        if (won) wins += 1
+        prefs.edit()
+            .putInt("DUELS_TOTAL", total)
+            .putInt("DUELS_WON", wins)
+            .apply()
+    }
+
+    fun getDuelsWon(): Int = prefs.getInt("DUELS_WON", 0)
+    
+    fun getDuelsTotal(): Int = prefs.getInt("DUELS_TOTAL", 0)
 }
