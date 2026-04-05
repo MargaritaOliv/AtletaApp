@@ -6,6 +6,8 @@ sealed class Screens {
     @Serializable object Login
     @Serializable object Register
     @Serializable object Home
+    @Serializable object Duel
+    @Serializable object Ranking
     @Serializable object Social
     @Serializable object DuelSelection
 

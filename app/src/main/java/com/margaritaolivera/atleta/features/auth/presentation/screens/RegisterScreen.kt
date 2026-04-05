@@ -14,28 +14,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.margaritaolivera.atleta.features.auth.presentation.viewmodels.AuthViewModel
 import com.margaritaolivera.atleta.core.ui.theme.*
 
 @Composable
 fun RegisterScreen(
-    viewModel: AuthViewModel,
-    onBackToLogin: () -> Unit
+    state: AuthUiState,
+    onNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onRegisterClick: () -> Unit,
+    onRegisterSuccess: () -> Unit,
+    onBackToLogin: () -> Unit,
+    onResetState: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
-    val name by viewModel.nameRegister.collectAsState()
-    val email by viewModel.emailRegister.collectAsState()
-    val password by viewModel.passwordRegister.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
             android.widget.Toast.makeText(context, "Registro exitoso", android.widget.Toast.LENGTH_SHORT).show()
-            viewModel.resetState()
-            onBackToLogin()
+            onResetState()
+            onRegisterSuccess()
         }
     }
 
@@ -91,8 +91,8 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
-            value = name,
-            onValueChange = { viewModel.nameRegister.value = it },
+            value = state.nameRegister,
+            onValueChange = onNameChange,
             placeholder = "Nombre completo",
             icon = Icons.Default.Person
         )
@@ -110,8 +110,8 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
-            value = email,
-            onValueChange = { viewModel.emailRegister.value = it },
+            value = state.emailRegister,
+            onValueChange = onEmailChange,
             placeholder = "tu@correo.com",
             icon = Icons.Default.Email
         )
@@ -129,8 +129,8 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
-            value = password,
-            onValueChange = { viewModel.passwordRegister.value = it },
+            value = state.passwordRegister,
+            onValueChange = onPasswordChange,
             placeholder = "••••••••",
             icon = Icons.Default.Lock,
             isPassword = true
@@ -139,7 +139,7 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = { viewModel.registerAndSync() },
+            onClick = onRegisterClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp),
