@@ -35,6 +35,10 @@ fun DuelSelectionScreen(
     var selectedFriendXp by remember { mutableIntStateOf(0) }
     var showWorkoutSelector by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        viewModel.refreshDuelData()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

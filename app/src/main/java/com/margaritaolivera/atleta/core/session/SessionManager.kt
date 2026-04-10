@@ -53,6 +53,8 @@ class SessionManager @Inject constructor(
             .remove("last_stat_SQUAT")
             .remove("last_stat_RUN")
             .remove("last_stat_JOG")
+            .remove("DUELS_TOTAL")
+            .remove("DUELS_WON")
             .apply()
     }
 
@@ -65,10 +67,10 @@ class SessionManager @Inject constructor(
     fun logout() {
         prefs.edit()
             .remove("TOKEN")
-            .remove("FCM_TOKEN")
             .remove("NAME")
             .remove("LEVEL")
             .remove("XP")
+            .remove("USER_ID")
             .apply()
     }
 
@@ -108,6 +110,6 @@ class SessionManager @Inject constructor(
     }
 
     fun getDuelsWon(): Int = prefs.getInt("DUELS_WON", 0)
-    
+
     fun getDuelsTotal(): Int = prefs.getInt("DUELS_TOTAL", 0)
 }

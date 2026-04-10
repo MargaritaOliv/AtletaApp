@@ -16,6 +16,9 @@ class AuthRepositoryImpl @Inject constructor(
     private val sessionManager: SessionManager
 ) : AuthRepository {
     override suspend fun loginAndSync(email: String, password: String): Result<Athlete> = try {
+        // Limpieza previa para asegurar un estado limpio antes del nuevo login
+        sessionManager.logout()
+        
         val loginResult = firebaseAuthManager.login(email, password)
         if (loginResult.isFailure) throw Exception(loginResult.exceptionOrNull()?.message)
 
@@ -43,6 +46,7 @@ class AuthRepositoryImpl @Inject constructor(
             xp = apiResponse.experience
         )
 
+        // Sincronización CRÍTICA del Token FCM
         try {
             val fcmToken = FirebaseMessaging.getInstance().token.await()
             updatePushToken(fcmToken)
@@ -65,6 +69,8 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun registerAndSync(name: String, email: String, password: String): Result<Athlete> = try {
+        sessionManager.logout()
+
         val registerResult = firebaseAuthManager.register(email, password, name)
         if (registerResult.isFailure) throw Exception(registerResult.exceptionOrNull()?.message)
 

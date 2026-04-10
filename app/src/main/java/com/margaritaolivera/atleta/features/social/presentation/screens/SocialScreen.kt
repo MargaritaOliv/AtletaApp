@@ -66,6 +66,10 @@ fun SocialScreen(viewModel: SocialViewModel) {
     var showAddFriendDialog by remember { mutableStateOf(false) }
     var friendUidInput by remember { mutableStateOf("") }
 
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.loadAllSocialData()
+    }
+
     Scaffold(
         floatingActionButton = {
             if (selectedTab == 0) {
