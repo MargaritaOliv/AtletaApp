@@ -12,13 +12,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class DuelSelectionUiState(
-    val isLoading: Boolean = false,
-    val friends: List<Friend> = emptyList(),
-    val userXp: Int = 0,
-    val error: String? = null
-)
-
 @HiltViewModel
 class DuelViewModel @Inject constructor(
     private val getFriendsListUseCase: GetFriendsListUseCase,
@@ -29,17 +22,17 @@ class DuelViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
-        loadDuelData()
+        refreshDuelData()
     }
 
-    private fun loadDuelData() {
+    fun refreshDuelData() {
         val currentXp = sessionManager.getXp()
         _uiState.update { it.copy(isLoading = true, userXp = currentXp) }
         
         viewModelScope.launch {
             getFriendsListUseCase().fold(
                 onSuccess = { friends ->
-                    _uiState.update { it.copy(isLoading = false, friends = friends) }
+                    _uiState.update { it.copy(isLoading = false, friends = friends, error = null) }
                 },
                 onFailure = { e ->
                     _uiState.update { it.copy(isLoading = false, error = e.message) }
@@ -48,3 +41,10 @@ class DuelViewModel @Inject constructor(
         }
     }
 }
+
+data class DuelSelectionUiState(
+    val isLoading: Boolean = false,
+    val friends: List<Friend> = emptyList(),
+    val userXp: Int = 0,
+    val error: String? = null
+)

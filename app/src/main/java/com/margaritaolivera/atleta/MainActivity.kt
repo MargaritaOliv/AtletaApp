@@ -11,6 +11,8 @@ import androidx.core.content.ContextCompat
 import com.margaritaolivera.atleta.core.auth.FirebaseAuthManager
 import com.margaritaolivera.atleta.core.navigation.AppNavigation
 import com.margaritaolivera.atleta.core.navigation.Screens
+import com.margaritaolivera.atleta.core.session.SessionManager
+import com.margaritaolivera.atleta.core.ui.theme.AtletaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -19,6 +21,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var firebaseAuthManager: FirebaseAuthManager
+
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -30,14 +35,16 @@ class MainActivity : ComponentActivity() {
         
         askNotificationPermission()
 
-        val startDestination = if (firebaseAuthManager.currentUser != null) {
+        val startDestination = if (firebaseAuthManager.currentUser != null && sessionManager.getName() != null) {
             Screens.Home
         } else {
             Screens.Login
         }
 
         setContent {
-            AppNavigation(startDestination = startDestination)
+            AtletaTheme {
+                AppNavigation(startDestination = startDestination)
+            }
         }
     }
 
