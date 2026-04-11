@@ -18,7 +18,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -41,16 +40,13 @@ android {
 }
 
 dependencies {
-    // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation("com.google.firebase:firebase-messaging")
     implementation(libs.kotlinx.coroutines.play.services)
 
-    // Lottie - Animaciones JSON
     implementation("com.airbnb.android:lottie-compose:6.4.0")
 
-    // Core & Compose
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -62,16 +58,17 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation("androidx.compose.material:material-icons-extended")
 
-    // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
-    // Retrofit
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
 
-    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
@@ -79,7 +76,5 @@ dependencies {
     implementation(libs.socket.io.client)
     implementation(libs.coil.compose)
 
-    // Local Test
     testImplementation(libs.junit)
-
 }

@@ -2,6 +2,8 @@ package com.margaritaolivera.atleta.features.auth.data.repositories
 
 import com.google.firebase.messaging.FirebaseMessaging
 import com.margaritaolivera.atleta.core.auth.FirebaseAuthManager
+import com.margaritaolivera.atleta.core.database.AtletaDao
+import com.margaritaolivera.atleta.core.database.entities.UserEntity
 import com.margaritaolivera.atleta.core.session.SessionManager
 import com.margaritaolivera.atleta.features.auth.data.remote.api.AuthApi
 import com.margaritaolivera.atleta.features.auth.data.remote.model.FcmTokenRequest
@@ -13,16 +15,17 @@ import javax.inject.Inject
 class AuthRepositoryImpl @Inject constructor(
     private val api: AuthApi,
     private val firebaseAuthManager: FirebaseAuthManager,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val atletaDao: AtletaDao
 ) : AuthRepository {
     override suspend fun loginAndSync(email: String, password: String): Result<Athlete> = try {
-        // Limpieza previa para asegurar un estado limpio antes del nuevo login
         sessionManager.logout()
-        
+
         val loginResult = firebaseAuthManager.login(email, password)
         if (loginResult.isFailure) throw Exception(loginResult.exceptionOrNull()?.message)
 
-        sessionManager.saveToken(loginResult.getOrThrow())
+        val tokenString = loginResult.getOrThrow()
+        sessionManager.saveToken(tokenString)
 
         val apiResponse = api.loginSync().user
 
@@ -31,6 +34,8 @@ class AuthRepositoryImpl @Inject constructor(
             sessionManager.clearAllWorkoutData()
         }
         sessionManager.saveUserId(apiResponse.id)
+
+        atletaDao.insertUser(UserEntity(id = apiResponse.id, token = tokenString))
 
         val savedName = sessionManager.getName()
         val finalName = if (previousUserId == apiResponse.id && savedName != null) {
@@ -46,7 +51,6 @@ class AuthRepositoryImpl @Inject constructor(
             xp = apiResponse.experience
         )
 
-        // Sincronización CRÍTICA del Token FCM
         try {
             val fcmToken = FirebaseMessaging.getInstance().token.await()
             updatePushToken(fcmToken)
@@ -74,7 +78,8 @@ class AuthRepositoryImpl @Inject constructor(
         val registerResult = firebaseAuthManager.register(email, password, name)
         if (registerResult.isFailure) throw Exception(registerResult.exceptionOrNull()?.message)
 
-        sessionManager.saveToken(registerResult.getOrThrow())
+        val tokenString = registerResult.getOrThrow()
+        sessionManager.saveToken(tokenString)
 
         val apiResponse = api.loginSync().user
 
@@ -83,6 +88,8 @@ class AuthRepositoryImpl @Inject constructor(
             sessionManager.clearAllWorkoutData()
         }
         sessionManager.saveUserId(apiResponse.id)
+
+        atletaDao.insertUser(UserEntity(id = apiResponse.id, token = tokenString))
 
         val finalName = apiResponse.displayName?.takeIf { it.isNotBlank() && it != "Atleta" } ?: name
 

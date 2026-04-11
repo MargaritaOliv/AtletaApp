@@ -2,6 +2,7 @@ package com.margaritaolivera.atleta.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.margaritaolivera.atleta.core.database.AtletaDao
 import com.margaritaolivera.atleta.core.database.AtletaDatabase
 import dagger.Module
 import dagger.Provides
@@ -24,4 +25,9 @@ object DatabaseModule {
         ).fallbackToDestructiveMigration().build()
     }
 
+    @Provides
+    @Singleton
+    fun provideAtletaDao(database: AtletaDatabase): AtletaDao {
+        return database.atletaDao()
+    }
 }
